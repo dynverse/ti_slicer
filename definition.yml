@@ -1,6 +1,6 @@
 id: slicer
-docker_repository: dynverse/dynmethods:slicer
-container_url: https://github.com/dynverse/dynmethods/tree/master/containers/slicer
+docker_repository: dynverse/ti_slicer
+container_url: https://github.com/dynverse/ti_slicer
 name: SLICER
 type: algorithm
 platform: R
