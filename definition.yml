@@ -1,5 +1,6 @@
 id: slicer
 docker_repository: dynverse/ti_slicer
+singularity_collection: 1581
 container_url: https://github.com/dynverse/ti_slicer
 name: SLICER
 type: algorithm
