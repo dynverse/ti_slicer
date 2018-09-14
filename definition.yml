@@ -14,6 +14,8 @@ trajectory_types:
 - multifurcation
 - binary_tree
 - tree
+- acyclic graph
+- graph
 topology_inference: free
 license: GPL-2
 preprint_date: '2016-04-09'
