@@ -8,13 +8,14 @@ platform: R
 doi: 10.1186/s13059-016-0975-3
 google_scholar_cluster_id: '2071780199208319199'
 trajectory_types:
+- cycle
 - linear
 - bifurcation
 - convergence
 - multifurcation
 - binary_tree
 - tree
-- acyclic graph
+- acyclic_graph
 - graph
 topology_inference: free
 license: GPL-2
