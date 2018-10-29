@@ -2,7 +2,7 @@ FROM dynverse/dynwrap:r
 
 RUN R -e 'devtools::install_cran("SLICER")'
 
-LABEL version 0.1.4
+LABEL version 0.1.6
 
 ADD . /code
 
