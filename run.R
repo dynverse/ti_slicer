@@ -1,3 +1,7 @@
+#!/usr/local/bin/Rscript
+
+task <- dyncli::main()
+
 library(jsonlite)
 library(readr)
 library(dplyr)
@@ -10,20 +14,11 @@ library(igraph)
 #   ____________________________________________________________________________
 #   Load data                                                               ####
 
-data <- read_rds("/ti/input/data.rds")
-params <- jsonlite::read_json("/ti/input/params.json")
-
-
-#' @examples
-#' data <- dyntoy::generate_dataset(id = "test", num_cells = 300, num_features = 300, model = "linear") %>% c(., .$prior_information)
-#' params <- yaml::read_yaml("containers/slicer/definition.yml")$parameters %>%
-#'   {.[names(.) != "forbidden"]} %>%
-#'   map(~ .$default)
-
-expression <- data$expression
-start_id <- data$start_id
-features_id <- data$features_id
-end_id <- data$end_id
+expression <- as.matrix(task$expression)
+params <- task$params
+start_id <- task$priors$start_id
+features_id <- task$priors$features_id
+end_id <- task$priors$end_id
 
 start_cell <- sample(start_id, 1)
 
@@ -81,16 +76,12 @@ nodes_to_keep <- unique(sh_p_to_ends$vpath %>% unlist)
 cell_ids <- names(igraph::V(traj_graph))
 to_keep <- setNames(seq_along(cell_ids) %in% nodes_to_keep, cell_ids)
 
-# return output
-output <- lst(
-  cell_ids,
-  cell_graph,
-  to_keep,
-  dimred = traj_lle,
-  timings = checkpoints
-)
-
 #   ____________________________________________________________________________
 #   Save output                                                             ####
 
-write_rds(output, "/ti/output/output.rds")
+output <- dynwrap::wrap_data(cell_ids = cell_ids) %>%
+  dynwrap::add_cell_graph(cell_graph = cell_graph, to_keep = to_keep) %>%
+  dynwrap::add_dimred(dimred = traj_lle) %>%
+  dynwrap::add_timings(timings = checkpoints)
+
+output %>% dyncli::write_output(task$output)
