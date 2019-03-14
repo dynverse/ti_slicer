@@ -39,7 +39,6 @@ wrapper:
   - tree
   - acyclic_graph
   - graph
-  example: /code/example.R
   input_required:
   - expression
   - start_id
