@@ -15,7 +15,7 @@ library(igraph)
 #   Load data                                                               ####
 
 expression <- as.matrix(task$expression)
-params <- task$params
+parameters <- task$parameters
 start_id <- task$priors$start_id
 features_id <- task$priors$features_id
 end_id <- task$priors$end_id
@@ -32,15 +32,15 @@ expr_filt <- expression[, features_id]
 checkpoints <- list(method_afterpreproc = as.numeric(Sys.time()))
 
 # determine k for knn
-k <- SLICER::select_k(expr_filt, kmin = params$kmin)
+k <- SLICER::select_k(expr_filt, kmin = parameters$kmin)
 
 # perform local linear embedding
-traj_lle <- lle::lle(expr_filt, m = params$m, k = params$k)$Y
+traj_lle <- lle::lle(expr_filt, m = parameters$m, k = parameters$k)$Y
 rownames(traj_lle) <- rownames(expr_filt)
 colnames(traj_lle) <- paste0("comp_", seq_len(ncol(traj_lle)))
 
 # get LLE KNN graph
-traj_graph <- SLICER::conn_knn_graph(traj_lle, k = params$k)
+traj_graph <- SLICER::conn_knn_graph(traj_lle, k = parameters$k)
 igraph::V(traj_graph)$name <- rownames(traj_lle)
 
 # find extreme cells
