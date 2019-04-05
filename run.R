@@ -2,14 +2,12 @@
 
 task <- dyncli::main()
 
-library(jsonlite)
-library(readr)
-library(dplyr)
-library(purrr)
+library(dplyr, warn.conflicts = FALSE)
+library(purrr, warn.conflicts = FALSE)
 
-library(SLICER)
-library(lle)
-library(igraph)
+library(SLICER, warn.conflicts = FALSE)
+library(lle, warn.conflicts = FALSE)
+library(igraph, warn.conflicts = FALSE)
 
 #   ____________________________________________________________________________
 #   Load data                                                               ####
