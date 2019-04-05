@@ -1,9 +1,9 @@
-FROM dynverse/dynwrap:r
+FROM dynverse/dynwrapr:v0.1.0
+
+ARG GITHUB_PAT
 
 RUN R -e 'devtools::install_cran("SLICER")'
 
-LABEL version 0.1.6
+COPY definition.yml run.R example.sh /code/
 
-ADD . /code
-
-ENTRYPOINT Rscript /code/run.R
+ENTRYPOINT ["/code/run.R"]

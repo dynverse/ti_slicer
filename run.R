@@ -1,29 +1,22 @@
-library(jsonlite)
-library(readr)
-library(dplyr)
-library(purrr)
+#!/usr/local/bin/Rscript
 
-library(SLICER)
-library(lle)
-library(igraph)
+task <- dyncli::main()
+
+library(dplyr, warn.conflicts = FALSE)
+library(purrr, warn.conflicts = FALSE)
+
+library(SLICER, warn.conflicts = FALSE)
+library(lle, warn.conflicts = FALSE)
+library(igraph, warn.conflicts = FALSE)
 
 #   ____________________________________________________________________________
 #   Load data                                                               ####
 
-data <- read_rds("/ti/input/data.rds")
-params <- jsonlite::read_json("/ti/input/params.json")
-
-
-#' @examples
-#' data <- dyntoy::generate_dataset(id = "test", num_cells = 300, num_features = 300, model = "linear") %>% c(., .$prior_information)
-#' params <- yaml::read_yaml("containers/slicer/definition.yml")$parameters %>%
-#'   {.[names(.) != "forbidden"]} %>%
-#'   map(~ .$default)
-
-expression <- data$expression
-start_id <- data$start_id
-features_id <- data$features_id
-end_id <- data$end_id
+expression <- as.matrix(task$expression)
+parameters <- task$parameters
+start_id <- task$priors$start_id
+features_id <- task$priors$features_id
+end_id <- task$priors$end_id
 
 start_cell <- sample(start_id, 1)
 
@@ -37,15 +30,15 @@ expr_filt <- expression[, features_id]
 checkpoints <- list(method_afterpreproc = as.numeric(Sys.time()))
 
 # determine k for knn
-k <- SLICER::select_k(expr_filt, kmin = params$kmin)
+k <- SLICER::select_k(expr_filt, kmin = parameters$kmin)
 
 # perform local linear embedding
-traj_lle <- lle::lle(expr_filt, m = params$m, k = params$k)$Y
+traj_lle <- lle::lle(expr_filt, m = parameters$m, k = parameters$k)$Y
 rownames(traj_lle) <- rownames(expr_filt)
 colnames(traj_lle) <- paste0("comp_", seq_len(ncol(traj_lle)))
 
 # get LLE KNN graph
-traj_graph <- SLICER::conn_knn_graph(traj_lle, k = params$k)
+traj_graph <- SLICER::conn_knn_graph(traj_lle, k = parameters$k)
 igraph::V(traj_graph)$name <- rownames(traj_lle)
 
 # find extreme cells
@@ -81,16 +74,12 @@ nodes_to_keep <- unique(sh_p_to_ends$vpath %>% unlist)
 cell_ids <- names(igraph::V(traj_graph))
 to_keep <- setNames(seq_along(cell_ids) %in% nodes_to_keep, cell_ids)
 
-# return output
-output <- lst(
-  cell_ids,
-  cell_graph,
-  to_keep,
-  dimred = traj_lle,
-  timings = checkpoints
-)
-
 #   ____________________________________________________________________________
 #   Save output                                                             ####
 
-write_rds(output, "/ti/output/output.rds")
+output <- dynwrap::wrap_data(cell_ids = cell_ids) %>%
+  dynwrap::add_cell_graph(cell_graph = cell_graph, to_keep = to_keep) %>%
+  dynwrap::add_dimred(dimred = traj_lle) %>%
+  dynwrap::add_timings(timings = checkpoints)
+
+output %>% dyncli::write_output(task$output)
